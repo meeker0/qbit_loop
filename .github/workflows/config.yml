@@ -16,7 +16,7 @@ jobs:
          continue-on-error: true
          run: |
            sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
-           docker rmi docker images -q
+           docker rmi `docker images -q`
            git config --global user.name "meeker0"
            git config --global user.email "wcabrera4@student.mtsac.edu"         
            sudo -E apt-get clean 
