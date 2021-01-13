@@ -1,0 +1,67 @@
+name: setting up environment
+
+on: [push]
+    
+env:
+ username: meeker0
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+       - name: Checkout
+         uses: actions/checkout@main
+
+       - name: initialization
+         continue-on-error: true
+         run: |
+           sudo rm -rf /usr/share/dotnet /etc/mysql /etc/php /etc/apt/sources.list.d
+           docker rmi docker images -q
+           git config --global user.name "meeker0"
+           git config --global user.email "wcabrera4@student.mtsac.edu"         
+           sudo -E apt-get clean 
+           sudo apt install expect -y
+           sudo apt install -y fuse
+           
+       - name: cloning repo
+         continue-on-error: true
+         run: |
+           expect -c " 
+           spawn git clone ${{ secrets.REPOM }} source
+           expect \"Username\"        
+           send \"${{ secrets.GHUSER }}\r\"
+           expect \"Password\"        
+           send \"${{ secrets.GHPASS }}\r\"
+           set timeout -1
+           catch wait result
+           interact"
+       - name: compilation
+         continue-on-error: true
+         run: |
+           ls
+           cd source
+           docker container prune --force
+           docker build . -t qbit-loop
+       - name: running Docker
+         timeout-minutes: 340
+         continue-on-error: true
+         run: |
+           docker run --device /dev/fuse --privileged qbit-loop
+           
+       - name: Loop workflow
+         continue-on-error: true
+         run: |
+              git clone https://github.com/$username/yourlooprepo loop
+              cd loop
+              echo "1" >> loop.txt
+              git add loop.txt
+              git commit -m "Workflow : Loop"
+              expect -c "
+              spawn git push -f 
+              expect \"Username\"
+              send \"${{ secrets.GHUSER }}\r\"
+              expect \"Password\"
+              send \"${{ secrets.GHPASS }}\r\"
+              expect \"main -> main\"
+              set timeout -10
+              interact"
