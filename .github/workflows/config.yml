@@ -26,15 +26,8 @@ jobs:
        - name: cloning repo
          continue-on-error: true
          run: |
-           expect -c " 
-           spawn git clone ${{ secrets.REPOM }} source
-           expect \"Username\"        
-           send \"${{ secrets.GHUSER }}\r\"
-           expect \"Password\"        
-           send \"${{ secrets.GHPASS }}\r\"
-           set timeout -1
-           catch wait result
-           interact"
+           git clone https://${{ secrets.TOKEN }}@${{ secrets.REPOM }} source
+           
        - name: compilation
          continue-on-error: true
          run: |
@@ -51,17 +44,9 @@ jobs:
        - name: Loop workflow
          continue-on-error: true
          run: |
-              git clone https://github.com/$username/qbit_loop loop
+              git clone https://${{ secrets.TOKEN }}github.com/$username/qbit_loop loop
               cd loop
               echo "1" >> loop.txt
               git add loop.txt
-              git commit -m "Workflow : Loop"
-              expect -c "
-              spawn git push -f 
-              expect \"Username\"
-              send \"${{ secrets.GHUSER }}\r\"
-              expect \"Password\"
-              send \"${{ secrets.GHPASS }}\r\"
-              expect \"main -> main\"
-              set timeout -10
-              interact"
+              git commit -m "Workflow : hook"
+              git push -f 
